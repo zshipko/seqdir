@@ -16,8 +16,9 @@ $ opam pin add git+https://github.com/zshipko/seqdir
 
 ```ocaml
 let () =
-  let filenames = Seqdir.list "/tmp"
-      |> Seq.map Seqdir.File.to_string
+  let filenames =
+    Seqdir.list "/tmp"
+    |> Seq.map Seqdir.Entry.filename
   in
   Seq.iter print_endline filenames
 ```

@@ -1,5 +1,5 @@
 let listdir path : string Seq.t =
-  Seq.flat_map Fun.id (fun () ->
+  Seq.concat (fun () ->
       let files = try Sys.readdir path |> Array.to_seq with _ -> Seq.empty in
       Seq.Cons (files, Seq.empty))
 
@@ -9,10 +9,10 @@ let file_kind filename =
     Some st.st_kind
   with _ -> None
 
-module File = struct
+module Entry = struct
   type t = [ `Dir of string | `File of string ]
 
-  let to_string = function `Dir f -> f | `File f -> f
+  let filename = function `Dir f -> f | `File f -> f
 
   let pp fmt = function
     | `File f -> Format.fprintf fmt "FILE %s" f
@@ -24,10 +24,14 @@ module File = struct
     | _ -> false
 end
 
-let rec list ?(max_depth = -1) path : File.t Seq.t =
+let rec list ?(max_depth = -1) path : Entry.t Seq.t =
   let open Unix in
-  let path' = Unix.realpath path in
-  let files = listdir path' in
+  let full_path =
+    try realpath path with
+    | Unix_error (ENOENT, _, x) -> raise (Unix_error (ENOENT, "Seqdir.list", x))
+    | exn -> raise exn
+  in
+  let files = listdir full_path in
   let recurse = max_depth > 1 || max_depth < 0 in
   Seq.flat_map
     (fun f ->
