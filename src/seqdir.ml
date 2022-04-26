@@ -3,11 +3,7 @@ let listdir path : string Seq.t =
       let files = try Sys.readdir path |> Array.to_seq with _ -> Seq.empty in
       Seq.Cons (files, Seq.empty))
 
-let file_kind filename =
-  try
-    let st = Unix.stat filename in
-    Some st.st_kind
-  with _ -> None
+let is_dir filename = Sys.file_exists filename && Sys.is_directory filename
 
 module Entry = struct
   type t = [ `Dir of string | `File of string ]
@@ -36,13 +32,10 @@ let rec list ?(max_depth = -1) path : Entry.t Seq.t =
   Seq.flat_map
     (fun f ->
       let f = Filename.concat path f in
-      match file_kind f with
-      | Some S_DIR when recurse ->
-          let acc = list ~max_depth:(max_depth - 1) f in
-          Seq.cons (`Dir f) acc
-      | Some S_DIR -> Seq.return (`Dir f)
-      | Some S_REG -> Seq.return (`File f)
-      | Some S_LNK | Some S_BLK | Some S_CHR | Some S_SOCK | Some S_FIFO | None
-        ->
-          Seq.empty)
+      let is_dir = is_dir f in
+      if is_dir && recurse then
+        let acc = list ~max_depth:(max_depth - 1) f in
+        Seq.cons (`Dir f) acc
+      else if is_dir then Seq.return (`Dir f)
+      else Seq.return (`File f))
     files
