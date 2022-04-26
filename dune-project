@@ -20,8 +20,8 @@
 (package
  (name seqdir)
  (synopsis "A package to make listing files easier")
- (description "Seqdir can be used to create a seqence of file names contained in a directory")
- (depends ocaml dune unix)
+ (description "Seqdir can be used to create a sequence of file names contained in a directory")
+ (depends ocaml dune)
  (tags
   (listdir ls)))
 
