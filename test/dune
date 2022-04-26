@@ -1,0 +1,3 @@
+(cram
+ (package seqdir)
+ (deps %{bin:seqdir}))

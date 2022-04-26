@@ -1,0 +1,4 @@
+(library
+ (name seqdir)
+ (public_name seqdir)
+ (libraries unix))
