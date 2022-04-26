@@ -28,7 +28,7 @@ let rec list ?(max_depth = -1) path : File.t Seq.t =
   let open Unix in
   let path' = Unix.realpath path in
   let files = listdir path' in
-  let recurse = max_depth > 0 || max_depth < 0 in
+  let recurse = max_depth > 1 || max_depth < 0 in
   Seq.flat_map
     (fun f ->
       let f = Filename.concat path f in
